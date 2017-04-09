@@ -1,0 +1,229 @@
+[component widget-mediagrid][! aka ws2016 photoalbum !]
+  <div class="embeddedobject photoalbumwidget [!display_cssclass!] [if ispreview]previewmode[else]livemode[/if]"[! main__contents--12col !]
+       data-instanceid="[instanceid]"
+       >
+    <div class="justifiedmediagrid">
+      [forevery slides]
+        <div class="photoalbumwidget__item">
+          <img src="[image_grid.link]"
+               srcset="[image_grid.link] 1x, [image_grid_2x.link] 2x"
+               title="[title]"
+               data-width="[image_grid.width]"
+               data-height="[image_grid.height]"
+               />
+          [if title]<div class="photoalbumwidget__item-title">[title]</div>[/if]
+        </div>
+      [/forevery]
+    </div>
+  </div>
+  [if not ispreview]
+    [embed photoalbum_carrousel]
+  [/if]
+[/component]
+
+
+
+[! The fullscreen photo viewer !]
+[!ADDME: If there is only one photo (e.g. in an image widget), don't show the navigation !]
+[component photoalbum_carrousel]
+  [! NOTE: this element will be moved into the body upon first activation (click/tap on a photo in the photoalbum) !]
+  <div id="[instanceid]-slideshow"
+       class="photoalbumwidget__slideshow fsslideshow"
+       data-carrousel-options='{"activeslidealignment":"viewport_left"}'
+       >
+    [embed carrousel_slides_css]
+
+    <div class="carrousel livemode">
+      <div class="carrousel__viewport">
+[!        <div class="carrousel__content" FIXME: might not be needed anymore? !]
+          [forevery slides]
+            [embed single_slide]
+          [/forevery]
+[!        </div> !]
+
+        &nbsp;[! IE10/11 gives back 0 as clientWidth in domready if there element has no inline content !]
+      </div>
+
+      [!
+      De sitetitel heeft niet genoeg ruimte onderin.
+      (het botst met het foto nummer en de foto titel)
+
+      <div class="photoalbumwidget__sitetitle">
+        [embed ../../../menu/menu.witty:sitetitle]
+      </div>
+      !]
+
+      <div class="fsslideshow__title"></div>
+
+      [embed photoviewer_buttons]
+    </div>
+  </div>
+[/component]
+
+
+[!
+[component photoviewer_buttons_ut]
+      <div class="fsslideshow__topbuttons">
+       [ ! - href will be set when another slide becomes activated
+          - on iOS this button is hidden because you can't download though a link on iOS
+            (we should use <img> for slides so holding down touch will trigger the context menu with the 'save image' option)
+       ! ]
+        <a class="fsslideshow__download fsslideshow__button" download>
+          <span class="UT-icon UT-icon-UT_icon_17_download-24px"></span>
+        </a>
+        <div class="fsslideshow__close fsslideshow__button">
+          <span class="UT-icon UT-icon-UT_icon_47_cross-16px"></span>
+        </div>
+      </div>
+
+      <div class="fsslideshow__navbuttons">
+        <div class="carrousel__previous fsslideshow__button">
+          <span class="UT-icon UT-icon-UT_icon_43_arrow-left-16px"></span>
+        </div>
+        <div class="carrousel__next fsslideshow__button">
+          <span class="UT-icon UT-icon-UT_icon_44_arrow-right-16px"></span>
+        </div>
+      </div>
+[/component]
+!]
+
+
+[component photoviewer_buttons]
+      <div class="fsslideshow__topbuttons">
+        [!
+        <a class="fsslideshow__download fsslideshow__button">[ ! href will be set when another slide becomes activated ! ]
+          <!-- Fontawesome cloud107.svg -->
+          <svg preserveAspectRatio="xMidYMid" viewBox="0 0 216 146">
+            <path d="M179.41,79.638c-4.536-5.676-10.333-9.355-17.395-11.039c2.228-3.367,3.34-7.115,3.34-11.243
+              c0-5.758-2.037-10.673-6.11-14.747c-4.073-4.073-8.988-6.11-14.746-6.11c-5.16,0-9.668,1.684-13.524,5.052
+              c-3.203-7.822-8.324-14.095-15.357-18.82c-7.033-4.726-14.787-7.089-23.261-7.089c-11.514,0-21.346,4.075-29.493,12.222
+              c-8.148,8.146-12.221,17.978-12.221,29.493c0,0.706,0.055,1.874,0.163,3.503c-6.409,2.987-11.514,7.468-15.317,13.442
+              c-3.802,5.976-5.703,12.492-5.703,19.555c0,10.048,3.572,18.643,10.714,25.785c7.142,7.144,15.738,10.715,25.786,10.715h88.645
+              c8.635,0,16.008-3.057,22.119-9.166c6.11-6.11,9.166-13.483,9.166-22.12C186.215,91.793,183.947,85.316,179.41,79.638z
+               M133.258,82.775l-28.598,28.599c-0.488,0.488-1.113,0.733-1.874,0.733c-0.76,0-1.385-0.245-1.874-0.733L72.234,82.695
+              c-0.489-0.489-0.733-1.113-0.733-1.874c0-0.706,0.257-1.317,0.773-1.833c0.517-0.516,1.127-0.774,1.833-0.774h18.25V49.536
+              c0-0.706,0.258-1.317,0.774-1.834c0.516-0.515,1.127-0.773,1.833-0.773h15.644c0.707,0,1.316,0.257,1.834,0.773
+              c0.515,0.517,0.773,1.128,0.773,1.834v28.678h18.25c0.76,0,1.385,0.245,1.873,0.733c0.489,0.488,0.732,1.113,0.732,1.874
+              C134.07,81.475,133.8,82.125,133.258,82.775z"></path>
+          </svg>
+        </a>
+        !]
+        <div class="fsslideshow__close fsslideshow__button">
+          <svg preserveAspectRatio="xMidYMid" width="111" height="112" viewBox="0 0 111 112">
+            <path d="M64.315,53.313 L12.306,1.304 C11.561,0.561 10.705,0.188 9.739,0.188 C8.771,0.188 7.915,0.561 7.172,1.304 L1.591,6.885 C0.847,7.629 0.475,8.486 0.475,9.452 C0.475,10.419 0.847,11.276 1.591,12.019 L45.453,55.880 L1.591,99.742 C0.847,100.486 0.475,101.343 0.475,102.309 C0.475,103.277 0.847,104.133 1.591,104.876 L7.172,110.456 C7.915,111.201 8.771,111.572 9.739,111.572 C10.705,111.572 11.561,111.201 12.306,110.456 L64.315,58.447 C65.057,57.704 65.431,56.848 65.431,55.880 C65.431,54.914 65.057,54.058 64.315,53.313 L64.315,53.313 Z"></path>
+            <path d="M109.886,6.885 L104.306,1.304 C103.561,0.561 102.705,0.188 101.739,0.188 C100.771,0.188 99.915,0.561 99.172,1.304 L47.163,53.313 C46.418,54.058 46.047,54.914 46.047,55.880 C46.047,56.848 46.418,57.704 47.163,58.447 L99.172,110.456 C99.915,111.201 100.771,111.572 101.739,111.572 C102.705,111.572 103.561,111.201 104.306,110.456 L109.886,104.876 C110.629,104.133 111.002,103.277 111.002,102.309 C111.002,101.343 110.629,100.486 109.886,99.742 L66.024,55.880 L109.886,12.019 C110.629,11.276 111.002,10.419 111.002,9.452 C111.002,8.486 110.629,7.629 109.886,6.885 L109.886,6.885 Z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="fsslideshow__navbuttons">
+        <div class="carrousel__previous fsslideshow__button">
+          [! https://raw.githubusercontent.com/encharm/Font-Awesome-SVG-PNG/master/black/svg/chevron-left.svg !]
+          <svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1427 301l-531 531 531 531q19 19 19 45t-19 45l-166 166q-19 19-45 19t-45-19l-742-742q-19-19-19-45t19-45l742-742q19-19 45-19t45 19l166 166q19 19 19 45t-19 45z"></path></svg>
+        </div>
+        <div class="carrousel__next fsslideshow__button">
+          [! https://raw.githubusercontent.com/encharm/Font-Awesome-SVG-PNG/master/black/svg/chevron-right.svg !]
+          <svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1363 877l-742 742q-19 19-45 19t-45-19l-166-166q-19-19-19-45t19-45l531-531-531-531q-19-19-19-45t19-45l166-166q19-19 45-19t45 19l742 742q19 19 19 45t-19 45z"></path></svg>
+        </div>
+      </div>
+[/component]
+
+
+
+
+[component carrousel_slides_css]
+  <style>
+    /* Small and extra small devices */
+    [forevery slides]
+      .image-[instanceid]-[seqnr]
+      {
+        background-image: url('[image.link]');
+        background-position: [if image.refpoint_backgroundposition][image.refpoint_backgroundposition][else]center[/if];
+      }
+    [/forevery]
+
+    /* Use the large version if we either have a high pixel density */
+    @media (-webkit-min-device-pixel-ratio: 2),
+           (min--moz-device-pixel-ratio: 2),
+           (min-resolution: 2dppx),
+           (min-resolution: 192dpi)
+    {
+      [forevery slides]
+        .image-[instanceid]-[seqnr]
+        {
+          background-image: url('[image_2x.link]');
+          background-position: [if image_2x.refpoint_backgroundposition][image_2x.refpoint_backgroundposition][else]center[/if];
+        }
+      [/forevery]
+    }
+  </style>
+[/component]
+
+
+
+[! In this case we have both a flexible width & height, so to support IE
+   we must use JS to autoresize. We pass the image size in the data-width and data-height
+   so we can relayout without having to wait for images to load.
+!]
+[component single_slide]
+  [if isvideo]
+    <div class="carrousel__cell"
+         data-title="[title]"
+         data-download="[downloadlink]"
+         data-filename="[downloadfilename]"
+         data-hash="[hash]"
+         >
+      [! <video src="[videolink]" loop="true" poster="[imagelink]"></video> !]
+      <div class="carrousel__cell-image image-[instanceid]-[seqnr]"
+           data-width="[image.width]"
+           data-height="[image.height]"
+           style="background-image: none;"
+           >
+        [!
+        [if title]<span class="carrousel__cell-title">[title]</span>[/if]
+        !]
+
+        <div class="videocontainer" data-video-options='{"autoplay":true}' data-video="[videojson]">
+        </div>
+
+        <div class="carrousel__cell-playbutton">
+          <svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
+            <style type="text/css">.st1{fill:currentColor;}</style>
+            <path class="st1" d="M1576 927l-1328 738q-23 13-39.5 3t-16.5-36v-1472q0-26 16.5-36t39.5 3l1328 738q23 13 23 31t-23 31z"/>
+          </svg>
+        </div>
+
+      </div>
+
+      <div class="video-close"></div>
+
+      [if description]
+        <div class="carrousel__cell-description" style="width: [image.width]px">
+          [description]
+        </div>
+      [/if]
+    </div>
+  [else]
+    <div class="carrousel__cell"
+         data-title="[title]"
+         data-download="[downloadlink]"
+         data-filename="[downloadfilename]"
+         data-hash="[hash]"
+         >
+      <div class="carrousel__cell-image image-[instanceid]-[seqnr]"
+           data-width="[image.width]"
+           data-height="[image.height]"
+           style="background-image: none;"
+           >
+        [![if title]<span class="carrousel__cell-title">[title]</span>[/if]!]
+      </div>
+
+      [if description]
+        <div class="carrousel__cell-description" style="width: [image.width]px">
+          [description]
+        </div>
+      [/if]
+
+    </div>
+  [/if]
+[/component]

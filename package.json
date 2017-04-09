@@ -1,0 +1,11 @@
+{
+  "name": "wh-mediagrid",
+  "version": "0.2.0",
+  "main": "src/index.es",
+  "author": "info@b-lex.nl",
+  "license": "MIT",
+  "webhare_widget":
+  {
+    "siteprofile": "wh/mediagrid.siteprl.xml"
+  }
+}

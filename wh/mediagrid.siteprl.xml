@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
+             xmlns:t="http://www.webhare.net/xmlns/tollium/screens"
+             >
+
+  <!--
+    Media Folder
+
+    We don't use the inbuild Webhare type because:
+    - we don't want the old settings tab
+    - it's dangerous/hard to override it's indextype (because it's defined on foldertype, cancelling any apply with indexfile)
+  -->
+  <contenttype namespace="scope:mediafolder">
+  </contenttype>
+
+  <foldertype typedef="scope:mediafolder"
+              tid="siteprofile.foldertypes.mediafolder"
+              tolliumicon="tollium:folders/photoalbum"
+              protectindexfile="true"
+              />
+              <!-- indexfile="contentlisting" -->
+
+  <!-- only allow images in photo album folders -->
+  <apply>
+    <to type="file" parenttype="scope:mediafolder" />
+    <denyfiletype typedef="*" />
+    <allowfiletype typedef="http://www.webhare.net/xmlns/publisher/imagefile" />
+  </apply>
+
+  <!-- Explicitely set richdocumentfile as index for photoalbum's
+       (because the basesiteprofile from Publisher will set contentlisting as default)
+  <apply>
+    <to type="folder" foldertype="http://blexdev_toolsforsites.webhare.nl/xmlns/mediafolder" />
+    <folderindex indexfile="newfile"
+                 newfiletype="http://www.webhare.net/xmlns/publisher/richdocumentfile"
+                 newfilename="index.rtd"
+                 />
+  </apply>
+  -->
+
+<!--
+ADDME: contentlisting which renders the foto's in the album
+
+  <apply>
+    <bodyrenderer library="./registrationform.whlib" objectname="RegistrationFormPage" />
+  </apply>
+
+
+
+     // The index of a photoalbum page will get a photoalbum widget
+    IF (this->is_photoalbum_index)
+    {
+      INSERT [ renderblock := PTR RenderAdhocWidget(
+                                    [ whfstype     := "http://www.utwente.nl/webhare/embobj/photoalbum"
+                                    , sourcefolder := this->targetfolder->id
+                                    ]
+                                  , this->targetobject
+                                  , [ webdesign := this ]
+                                  )
+             ] INTO pageconfig.inlinewidgets AT END;
+    }
+-->
+
+
+  <apply>
+    <to type="folder" />
+    <denyfoldertype typedef="http://www.webhare.net/xmlns/publisher/photoalbum" />
+    <allowfoldertype typedef="http://www.utwente.nl/webhare/ws2016/mediafolder" />
+  </apply>
+
+
+  <!--
+    Image Grid Widget
+  -->
+  <widgettype namespace="scope:mediagrid"
+              editfragment=".mediagrid"
+              renderlibrary="mediagrid.whlib"
+              renderobjectname="MediaGridWidget"
+              wittycomponent="mediagrid.witty:widget-mediagrid"
+              tid="widgettypes.mediagrid">
+    <members>
+      <member name="sourcefolder" type="whfsref" />
+      <member name="title"        type="string" />
+      <!-- member name="allowfullscreenslideshow" type="boolean" --><!-- ADDME -->
+      <!-- member name="showdownloadbutton" type="boolean" -->
+    </members>
+  </widgettype>
+
+  <fragment name="mediagrid"
+            xmlns="http://www.webhare.net/xmlns/tollium/screens"
+            implementation="none">
+    <contents gid="widgets.photoalbum">
+      <p:browseforobject composition="fsinstance"
+                         cellname="sourcefolder"
+                         acceptfiles="false"
+                         acceptfolders="true"
+                         /><!-- accepttypes="http://www.reelex.nl/webhare/ws2016/mediafolder" -->
+      <textedit cellname="title" composition="fsinstance" width="1pr" />
+    </contents>
+  </fragment>
+
+
+</siteprofile>

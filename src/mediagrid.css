@@ -1,0 +1,238 @@
+/** The photoalbum widget consists of
+    - a Justified Image Grid
+    - a fullscreen slideshow
+
+    FIXME: maybe not use fixed, but replace the contents... or place ourselves at the top with height: 100vh; and disable scrolling
+*/
+
+
+/*************************************************************************************
+
+Styling important for generic carrousel functionality
+
+*************************************************************************************/
+
+/* FIXME: rename to viewport?? */
+.carrousel__viewport
+{
+  -webkit-tap-highlight-color: transparent; /* iOS Safari */
+
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+
+  cursor: -webkit-grab; /* Safari < 9 */
+  cursor: grab;
+
+  /* prevent selection.
+     We cannot use preventDefault because touch devices must be able to
+     pick up the touch events to initiate a vertical scroll.
+  */
+  -ms-user-select: none; /* IE10/11 & Edge */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+/* when the carrousel is foccused it has keyboard navigation */
+.carrousel__viewport:focus
+{
+  outline: 0;
+}
+
+.carrousel.previewmode .carrousel__viewport
+{
+  white-space: nowrap;
+
+  overflow-x: scroll;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carrousel.livemode .carrousel__viewport
+{
+  overflow: hidden;
+}
+
+.carrousel.livemode .carrousel__cell
+{
+  position: absolute;
+  left: 0;
+  top: 0;
+  -webkit-backface-visibility: hidden;
+}
+
+.carrousel__cell .carrousel__cell-image
+{
+  display: block; /* set explicitely, it might be an anchor */
+  position: relative; /* to position the title within */
+
+  height: 100%;
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
+
+
+.carrousel.previewmode .carrousel__cell
+{
+  display: inline-block;
+  vertical-align: top;
+
+  white-space: normal; /* counteract white-space: nowrap; for previewmode css in backend */
+}
+
+.carrousel.previewmode .carrousel__cell + .carrousel__cell
+{
+  margin-left: 15px;
+}
+
+
+
+
+
+
+.photoalbumwidget__item
+{
+  cursor: pointer;
+}
+
+.photoalbumwidget__item-title
+{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 5px 10px;
+
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #FFFFFF;
+
+  opacity: 0;
+  -webkit-transform: translateY(100%);
+  transform: translateY(100%);
+
+  -webkit-transition: -webkit-transform 0.25s, opacity 0.25s; /* iOS < 9.2 */
+  transition: transform 0.25s, opacity 0.25s;
+
+  cursor: pointer;
+}
+
+html.allowhover .photoalbumwidget__item:hover .photoalbumwidget__item-title
+{
+  opacity: 1;
+  -webkit-transform: translateY(0%);
+  transform: translateY(0%);
+}
+
+
+
+
+
+.photoalbumwidget__slideshow
+{
+  display: none;
+
+  -webkit-tap-highlight-color: transparent; /* iOS Safari */
+
+/*  position: fixed;*/
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #1f2329; /* rgba(0, 0, 0, 0.75); */
+  z-index: 1337;
+}
+
+.photoalbumwidget__slideshow.prepare
+{
+  display: block;
+  visibility: hidden;
+}
+
+.photoalbumwidget__slideshow.visible
+{
+  visibility: visible;
+}
+
+.photoalbumwidget__slideshow .carrousel__viewport
+{
+}
+
+
+
+.fsslideshow--singleslide.prepare
+{
+  display: -ms-flex;
+  display: -webkit-flex;
+  display: flex;
+
+  -webkit-flex-direction: column;
+  flex-direction: column;
+}
+
+.fsslideshow--singleslide .carrousel__cell
+{
+  display: table; /* shrinkwrap without using position: absolute; or float */
+  margin: auto;
+}
+
+
+
+
+
+.photoalbumwidget__slideshow .carrousel
+{
+}
+
+.photoalbumwidget__slideshow .carrousel__cell
+{
+  box-shadow: 7px 12px 45px rgba(0, 0, 0, 0.75);
+}
+
+/*
+.photoalbumwidget__slideshow .carrousel__cell
+{
+  opacity: 0;
+  -webkit-transition: opacity 0.25s;
+  transition: opacity 0.25s;
+}
+
+.photoalbumwidget__slideshow .carrousel__cell.carrousel__cell--aligned
+{
+  opacity: 1;
+}
+*/
+
+
+
+
+
+/* FullScreen Slideshow */
+/*
+.fsslideshow .carrousel__cell-image
+{
+  background-image: none; / * !! prevent browsers from directly loading * /
+}
+*/
+
+/*
+.fsslideshow .carrousel__viewport
+{
+  -webkit-transform: scale(0);
+  transform: scale(0);
+
+  -webkit-transition: -webkit-transform 10.25s, opacity 10.25s; / * iOS < 9.2 * /
+  transition: transform 10.25s, opacity 10.25s;
+}
+.fsslideshow.visible .carrousel__viewport
+{
+  -webkit-transform: scale(1);
+  transform: scale(1);
+}
+*/
+
+
+
+

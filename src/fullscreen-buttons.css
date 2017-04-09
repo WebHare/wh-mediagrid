@@ -1,0 +1,90 @@
+.fsslideshow__title
+{
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+
+  color: #FFFFFF;
+
+  font-size: 18px;
+  font-weight: normal;
+
+  text-align: center;
+
+  letter-spacing: 0.2px;
+
+  color: #aaacae;
+}
+
+  .fsslideshow__topbuttons
+, .fsslideshow__navbuttons
+{
+  display: -ms-flexbox; /* IE10 */
+  display: -webkit-flex; /* needed for iOS < 9.2 and SF < 9 */
+  display: flex;
+}
+
+.fsslideshow__topbuttons
+{
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.fsslideshow__navbuttons
+{
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.fsslideshow__button
+{
+  width: 60px;
+  height: 60px;
+
+  text-align: center;
+  line-height: 60px;
+
+  cursor: pointer;
+}
+
+  .fsslideshow__button
+, .fsslideshow__title
+{
+  -webkit-transform: translate3D(0,0,0);
+  -webkit-backface-visibility: hidden;
+}
+
+  .fsslideshow__button > svg
+, .fsslideshow__button > svg
+{
+  fill: #888888;
+
+  -webkit-transition: fill 0.25s; /* iOS < 9.2 */
+  transition: fill 0.25s;
+
+  vertical-align: middle;
+
+  width: 18px;
+  height: 18px;
+
+  pointer-events: none; /* prevent the parts where the SVG is drawn from eating events in IE10/11 */
+}
+
+  html.allowhover .fsslideshow .fsslideshow__button:hover > svg
+, .fsslideshow .fsslideshow__button:active > svg
+{
+  fill: #FFFFFF;
+}
+
+.fsslideshow__download > svg
+{
+  width: 28px;
+  height: 28px;
+}
+.fsslideshow__close > svg
+{
+  width: 16px;
+  height: 16px;
+}

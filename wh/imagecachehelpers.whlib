@@ -1,0 +1,260 @@
+<?wh
+/*
+ORIGIN: minfin_wig < Stundent Union ? < ...
+*/
+
+LOADLIB "wh::float.whlib";
+LOADLIB "wh::filetypes/xml.whlib";
+
+LOADLIB "module::system/cache.whlib";
+
+
+/*
+module::system/internal/cache/imgcache.whlib 158,13: Exception EXCEPTION: No imagecache support for filetype 'image/svg+xml'.
+    IF (RecordExists(this->sitesettings.logo))
+    {
+      IF (this->sitesettings.logo.mimetype = "image/svg+xml")
+        sitelogo := GetCachedFileLink(this->sitesettings.logo, [ filename := this->sitesettings.logo.filename ]);
+      ELSE
+        sitelogo := GetCachedImageLink(this->sitesettings.logo, resizespecs.sitelogo);
+    }
+*/
+
+
+PUBLIC RECORD FUNCTION UpdateResizeInstructionsByAspectRatio(RECORD resize, STRING aspectratio)
+{
+  IF (resize.method != "fill")
+    THROW NEW Exception("Force aspect ratio by using fill");
+
+  FLOAT heightperc;
+
+  IF (aspectratio != "")
+  {
+    IF (resize.setwidth = 0) // fixed height
+    {
+      SWITCH(aspectratio)
+      {
+        CASE "4_3"  { resize.setwidth := resize.setheight / 3 * 4;  heightperc := 100 / 4 * 3; }
+        CASE "3_2"  { resize.setwidth := resize.setheight / 2 * 3;  heightperc := 100 / 3 * 2; }
+        CASE "16_9" { resize.setwidth := resize.setheight / 9 * 16; heightperc := 100 / 16 * 9; }
+        CASE "1_1"  { resize.setwidth := resize.setheight;          heightperc := 100; }
+
+        CASE "3_4"  { resize.setwidth := resize.setheight / 4 * 3;  heightperc := 100 / 3 * 4; }
+        CASE "2_3"  { resize.setwidth := resize.setheight / 3 * 2;  heightperc := 100 / 2 * 3; }
+
+        DEFAULT     { THROW NEW Exception("Unsupported aspect ratio."); }
+      }
+
+      //resize.method := aspectratio = "" ? "fit" : "fill";
+    }
+    ELSE IF (NOT CellExists(resize, "setheight") OR resize.setheight = 0)
+    {
+      IF (NOT CellExists(resize, "setheight"))
+        INSERT CELL setheight := 0 INTO resize;
+
+      SWITCH(aspectratio)
+      {
+        CASE "4_3"  { resize.setheight := resize.setwidth / 4 * 3;  heightperc := 100 / 4 * 3; }
+        CASE "3_2"  { resize.setheight := resize.setwidth / 3 * 2;  heightperc := 100 / 3 * 2; }
+        CASE "16_9" { resize.setheight := resize.setwidth / 16 * 9; heightperc := 100 / 16 * 9; }
+        CASE "1_1"  { resize.setheight := resize.setwidth; }
+
+        CASE "3_4"  { resize.setheight := resize.setwidth / 3 * 4;  heightperc := 100 / 3 * 4; }
+        CASE "2_3"  { resize.setheight := resize.setwidth / 2 * 3;  heightperc := 100 / 2 * 3; }
+
+        DEFAULT     { THROW NEW Exception("Unsupported aspect ratio."); }
+      }
+    }
+  }
+
+  RETURN resize;
+}
+
+// FIXME: nicer to have a STRING which represents a float for CSS ?
+PUBLIC INTEGER FUNCTION GetHeightPercentageForAspectRatio(STRING aspectratio)
+{
+  SWITCH(aspectratio)
+  {
+    CASE "4_3"  { RETURN 100 / 4 * 3; }
+    CASE "3_2"  { RETURN 100 / 3 * 2; }
+    CASE "16_9" { RETURN 100 / 16 * 9; }
+    CASE "1_1"  { RETURN 100; }
+
+    CASE "3_4"  { RETURN 100 / 3 * 4; }
+    CASE "2_3"  { RETURN 100 / 2 * 3; }
+
+    DEFAULT     { THROW NEW Exception("Unsupported aspect ratio."); }
+  }
+}
+
+
+/** @short works like GetCachedImageLink, except it also returns a normal link if the image is an SVG
+*/
+PUBLIC STRING FUNCTION GetCachedImageOrSVGLink(RECORD wrappedimage, RECORD resizeinstructions)
+{
+  IF (NOT RecordExists(wrappedimage))
+    RETURN "";
+
+  IF (wrappedimage.mimetype = "image/svg+xml")
+    RETURN GetCachedFileLink(wrappedimage, [ filename := wrappedimage.filename ]);
+  ELSE
+    RETURN GetCachedImageLink(wrappedimage, resizeinstructions);
+}
+
+RECORD FUNCTION GetSVGNaturalSize(BLOB svgimage)
+{
+  OBJECT xmldoc := MakeXMLDocument(svgimage, "");
+
+  FLOAT width := ToFloat(xmldoc->documentelement->GetAttribute("width"), 0);
+  FLOAT height := ToFloat(xmldoc->documentelement->GetAttribute("height"), 0);
+
+  STRING viewbox :=  xmldoc->documentelement->GetAttribute("viewBox");
+  STRING ARRAY coords := Tokenize(viewbox, " ");
+  FLOAT altwidth := ToFloat(coords[2], 0) - ToFloat(coords[0], 0);
+  FLOAT altheight := ToFloat(coords[3], 0) - ToFloat(coords[1], 0);
+
+  RETURN [ setwidth := width
+         , setheight := height
+         , altwidth := altwidth
+         , altheight := altheight
+         , width := Ceil(width ?? altwidth)
+         , height := Ceil(height ?? altheight)
+         ];
+}
+
+PUBLIC RECORD FUNCTION WrapCachedImageWithAspectRatio(RECORD imagerec, RECORD resize, STRING aspectratio)
+{
+  IF (NOT RecordExists(imagerec))
+    RETURN DEFAULT RECORD;
+
+  IF (imagerec.mimetype = "image/svg+xml")
+  {
+    RECORD size := GetSVGNaturalSize(imagerec.data);
+    RETURN [ link := GetCachedFileLink(imagerec, [ filename := imagerec.filename ])
+           , width := size.width
+           , height := size.height
+           , heightperc := FormatFloat(100 * size.height / size.width, 3)
+           ];
+  }
+
+  RECORD instructions := UpdateResizeInstructionsByAspectRatio(resize, aspectratio);
+
+  RECORD wrappedimage := WrapCachedImage(imagerec, instructions);
+  INSERT CELL heightperc   := aspectratio != "" ? GetHeightPercentageForAspectRatio(aspectratio) : (100 * wrappedimage.height / wrappedimage.width)
+            , instructions := instructions // for debugging purposes
+         INTO wrappedimage; // the height of the image in percentage of the width (to use as padding-top to stretch the container to fit the image)
+
+  RETURN wrappedimage;
+}
+
+
+
+PUBLIC RECORD FUNCTION MyWrapCachedImage(RECORD imagerec, RECORD instructions)
+{
+  IF (NOT RecordExists(imagerec))
+    RETURN DEFAULT RECORD;
+
+  IF (imagerec.mimetype = "image/svg+xml")
+  {
+    RECORD size := GetSVGNaturalSize(imagerec.data);
+    RETURN [ link := GetCachedFileLink(imagerec, [ filename := imagerec.filename ])
+           , width := size.width
+           , height := size.height
+           , heightperc := FormatFloat(100f * size.height / size.width, 3)
+           ];
+  }
+
+  RECORD wrappedimage := WrapCachedImage(imagerec, instructions);
+  INSERT CELL heightperc   := FormatFloat(100f * wrappedimage.height / wrappedimage.width, 3)
+            , instructions := instructions // for debugging purposes
+         INTO wrappedimage; // the height of the image in percentage of the width (to use as padding-top to stretch the container to fit the image)
+
+//ABORT(wrappedimage);
+
+  RETURN wrappedimage;
+}
+
+
+
+/*
+PUBLIC RECORD FUNCTION WrapCachedImageWithAspectRatio(RECORD imagerec, RECORD resize, STRING aspectratio, BOOLEAN returnplaceholder DEFAULTSTO FALSE)
+{
+  IF (NOT RecordExists(imagerec))
+  {
+    IF (returnplaceholder)
+      RETURN [ link := "", heightperc := GetHeightPercentageForAspectRatio(aspectratio) ];
+    ELSE
+      RETURN DEFAULT RECORD;
+  }
+
+  RECORD instructions := UpdateResizeInstructionsByAspectRatio(resize, aspectratio);
+
+  RECORD wrappedimage := WrapCachedImage(imagerec, instructions);
+  INSERT CELL heightperc   := aspectratio != "" ? GetHeightPercentageForAspectRatio(aspectratio) : (100 * wrappedimage.height / wrappedimage.width)
+            , instructions := instructions // for debugging purposes
+         INTO wrappedimage; // the height of the image in percentage of the width (to use as padding-top to stretch the container to fit the image)
+
+  RETURN wrappedimage;
+}
+*/
+
+
+// by Herman
+MACRO PrintSVG(BLOB svgdata, STRING title, STRING color )
+ {
+   OBJECT xmldoc := MakeXMLDocument(svgdata, "");
+   RECORD ARRAY errors := xmldoc->GetParseErrors();
+   IF(Length(errors) = 0)
+   {
+     OBJECT svgnode := xmldoc->documentelement;
+
+     OBJECT query := xmldoc->CreateXPathQuery();
+
+     //Remove html comments
+     FOREVERY (OBJECT node FROM query->ExecuteQuery("//comment()")->GetCurrentNodes())
+       node->Dispose();
+
+     //Cleanup and remove all empty textnodes
+     FOREVERY (OBJECT node FROM query->ExecuteQuery("//text()")->GetCurrentNodes())
+     {
+       node->textcontent := TrimWhiteSpace(node->textcontent);
+       IF( node->textcontent = "" )
+         node->Dispose();
+     }
+
+     //remove title and description
+     OBJECT titlenode := svgnode->GetElementsByTagName("title");
+     IF( ObjectExists(titlenode) )
+       titlenode->Dispose();
+
+     OBJECT descnode := svgnode->GetElementsByTagName("desc");
+     IF( ObjectExists(descnode) )
+       descnode->Dispose();
+
+     //create new 'clean' title
+     IF( title != "" )
+     {
+       titlenode := xmldoc->CreateElement("title");
+       titlenode->textcontent := title;
+       svgnode->AppendChild( titlenode );
+     }
+
+     IF( color != "" )
+       svgnode->SetAttribute("fill", color);//force color to white
+
+     Print( svgnode->outerxml ); //print just svg without xml start line ( <?xml ...> )
+   }
+ }
+
+ /*
+
+hermanborger [12:41 PM]
+Als je fill (en evt id) attributen wil verwijderen:
+     //remove fill and id attributes
+     FOREVERY (OBJECT node FROM query->ExecuteQuery("//*[@fill or @id]")->GetCurrentNodes())
+     {
+       node->RemoveAttribute("id");
+       node->RemoveAttribute("fill");
+     }
+
+*/

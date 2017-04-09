@@ -1,0 +1,173 @@
+/* make the normal content of the page use no space anymore,
+   so it appears all content is gone but without killing it's state
+   (running plugins, iframe content, eventlisteners etc).
+*/
+.html--onlyfullscreenelement
+.html--onlyfullscreenelement body
+.html--onlyfullscreenelement html
+{
+  overflow: hidden;
+}
+.html--onlyfullscreenelement .body__content
+{
+  height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
+
+
+/* make the normal content of the page use no space anymore,
+   so it appears all content is gone but without killing it's state
+   (running plugins, iframe content, eventlisteners etc).
+*/
+
+/* IE10 & IE11 will cut off the fullscreen slideshow
+   due to our overflow: hidden; on the body.
+
+  html.html--onlyfullscreenelement
+, html.html--onlyfullscreenelement body
+{
+  height: 100vw;
+}
+*/
+
+
+
+
+
+
+.fsslideshow .sitetitle__logo
+{
+  position: absolute;
+  left: 20px;
+  top: 0;
+
+  height: 60px;
+  line-height: 60px;
+
+  color: #FFFFFF;
+
+  font-size: 30px; /* instead of 26 */
+}
+
+/*
+.fsslideshow .photoalbumwidget__sitetitle
+{
+  position: absolute;
+  left: 20px;
+  bottom: 0;
+}
+.fsslideshow .photoalbumwidget__sitetitle .sitetitle__link
+{
+  color: #FFFFFF;
+}
+*/
+
+
+
+
+
+.fsslideshow__title
+{
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+
+  color: #FFFFFF;
+
+  font-size: 18px;
+  font-weight: normal;
+
+  text-align: center;
+
+  letter-spacing: 0.2px;
+
+  color: #aaacae;
+}
+
+  .fsslideshow__topbuttons
+, .fsslideshow__navbuttons
+{
+  display: -ms-flexbox; /* IE10 */
+  display: -webkit-flex; /* needed for iOS < 9.2 and SF < 9 */
+  display: flex;
+}
+
+.fsslideshow__topbuttons
+{
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.fsslideshow__navbuttons
+{
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.fsslideshow__button
+{
+  width: 60px;
+  height: 60px;
+
+  text-align: center;
+  line-height: 60px;
+
+  cursor: pointer;
+}
+
+  .fsslideshow__button
+, .fsslideshow__title
+{
+  -webkit-transform: translate3D(0,0,0);
+  -webkit-backface-visibility: hidden;
+}
+
+  .fsslideshow__button > .UT-icon
+, .fsslideshow__button > .UT-icon
+{
+  -webkit-transition: fill 0.25s; /* iOS < 9.2 */
+  transition: fill 0.25s;
+
+  vertical-align: middle;
+
+  font-size: 24px;
+  color: #999999;
+}
+
+  html.allowhover .fsslideshow .fsslideshow__button:hover > .UT-icon
+, .fsslideshow .fsslideshow__button:active > .UT-icon
+{
+  color: #FFFFFF;
+}
+
+.fsslideshow__download > .UT-icon
+{
+  font-size: 26px;
+}
+
+  .fsslideshow__close > .UT-icon
+, .carrousel__previous
+, .carrousel__next
+{
+  font-size: 22px;
+}
+
+/*
+.fsslideshow__download
+{
+}
+.fsslideshow__close
+{
+}
+.carrousel__previous
+{ 
+}
+.carrousel__next
+{ 
+}
+
+*/

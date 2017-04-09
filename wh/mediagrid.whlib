@@ -1,0 +1,135 @@
+<?wh
+LOADLIB "wh::crypto.whlib";
+LOADLIB "wh::datetime.whlib";
+LOADLIB "wh::witty.whlib";
+LOADLIB "wh::files.whlib";
+
+LOADLIB "module::system/cache.whlib";
+LOADLIB "module::system/database.whlib";
+LOADLIB "module::system/whfs.whlib";
+
+LOADLIB "module::publisher/widgets.whlib";
+LOADLIB "module::publisher/widgets/videowidget.whlib";
+//LOADLIB "module::publisher/embedvideo.whlib";
+
+
+LOADLIB "relative::imagecachehelpers.whlib";
+
+
+/*
+NOTES:
+- we could expand by giving several possible views:
+  - media grid  (justified image grid)
+  - collage     (see Student Union site)
+  - carrousel   (see ws2016 carrousel widget)
+*/
+
+/*
+LOADLIB "wh::internet/urls.whlib";
+LOADLIB "wh::util/algorithms.whlib";
+LOADLIB "wh::util/langspecific.whlib";
+LOADLIB "wh::util/localization.whlib";
+
+LOADLIB "module::publisher/widgets/htmlwidget.whlib";
+LOADLIB "module::publisher/publisher.whlib";
+LOADLIB "module::system/resources.whlib";
+LOADLIB "module::system/services.whlib";
+LOADLIB "module::tollium/gettid.whlib";
+
+LOADLIB "moduleroot::utwente_base/webdesigns/ws2016/lib/imagecache_helpers.whlib";
+LOADLIB "moduleroot::utwente_base/webdesigns/ws2016/lib/support.whlib";
+LOADLIB "moduleroot::utwente_base/webdesigns/ws2016/src/widgets/widgets.whlib";
+*/
+
+
+PUBLIC RECORD resizespecs :=
+  [ carrouselwidget_small_image    := [ method := "fill", setwidth := 0, setheight := 220 ] // devicePixelRatio of 1 or small screen
+  , carrouselwidget_small_image_2x := [ method := "fill", setwidth := 0, setheight := 220*2, quality := 60 ]
+  , carrouselwidget_large_image    := [ method := "fill", setwidth := 0, setheight := 450 ]
+  , carrouselwidget_large_image_2x := [ method := "fill", setwidth := 0, setheight := 450*2, quality := 60 ]
+
+  // NOTE: depending on the size at which is shown (instead of @media queries)
+  // ADDME: supply multiple sizes depending on rowheight used in JS
+  , photoalbum_gridthumb    := [ method := "fit", setheight := 300 ]
+  , photoalbum_gridthumb_2x := [ method := "fit", setheight := 300*2, quality := 60 ]
+
+  //, photoalbum_mobile       :=  ADDME
+  //FIXME 'Force aspect ratio by using fill' so changed this from fit to fill
+  , photoalbum_fullscreen    := [ method := "fill", setwidth := 1600, setheight := 1600, quality := 70 ]
+  , photoalbum_fullscreen_2x := [ method := "fill", setwidth := 2048, setheight := 2048, quality := 60 ]
+  ];
+
+
+
+/** @short photoalbum widget
+    @long shows a collage (justified image grid) of photos from an photoalbum folder
+*/
+PUBLIC OBJECTTYPE MediaGridWidget EXTEND WidgetBase
+<
+  UPDATE PUBLIC MACRO Render()
+  {
+    BOOLEAN ispreview := this->context->IsRTDPreview();
+
+    RECORD ARRAY slides :=
+        SELECT id
+             , title
+             , name
+          FROM system.fs_objects
+         WHERE parent = this->data.sourcefolder
+           AND type = 12 // only pick up images
+      ORDER BY ordering, ToUpperCase(title), id;
+
+
+    IF (ispreview)
+    {
+      PRINT(Length(slides) || " images will be shown here in the media collection widget");
+      RETURN;
+    }
+
+
+    //INTEGER amountofimages := Length(items);
+
+// ADDME: Cache using [ sourcefolder := ... ] and eventmask on the sourcefolder
+
+    slides :=
+        SELECT TEMPORARY imageobj := OpenWHFSObject(id)
+             , TEMPORARY wrappedimage := ObjectExists(imageobj) ? imageobj->GetWrapped() : DEFAULT RECORD
+             , id
+             , title
+             , description := "" // not used
+             , link        := ""
+
+             , hash := title != "" ? id || "-" || GetSafeFileName(title) : ToString(id)
+
+// ADDME: mobile version of the images?
+             , image     := WrapCachedImageWithAspectRatio(wrappedimage, resizespecs.photoalbum_fullscreen,    "")
+             , image_2x  := WrapCachedImageWithAspectRatio(wrappedimage, resizespecs.photoalbum_fullscreen_2x, "")
+
+             , image_grid    := WrapCachedImage(wrappedimage, resizespecs.photoalbum_gridthumb)
+             , image_grid_2x := WrapCachedImage(wrappedimage, resizespecs.photoalbum_gridthumb_2x)
+
+             // We MUST add a filename, this gives a better filename AND triggers a download (instead of viewing inline in the browser)
+             , downloadlink  := GetCachedFileLink(wrappedimage, [ filename := name/*file.filename*/ ]) //, allowanyextension := TRUE ])
+           //, downloadlink  := GetCachedFileLink(wrappedimage)
+             , downloadfilename := name
+
+           //, image := ObjectExists(imageobj) ? GetWrappedImage_With_AspectRatio(imageobj->GetWrapped(), "1_1") : DEFAULT RECORD
+             , videosjon := ""
+             , isvideo   := FALSE
+             , isimage   := TRUE
+          FROM slides;
+       //LIMIT 7;
+
+    //ABORT(AnyToString(slides, "tree"));
+
+    RECORD wittyfields :=
+           [ slides     := slides
+           , instanceid := GenerateUFS128BitId() //this->instanceid // so we can generate CSS for each slide within unique id/classnames
+           , ispreview  := ispreview
+           , pagetitle  := this->data.title ?? (SELECT AS STRING title FROM system.fs_objects WHERE id = this->data.sourcefolder)
+           ];
+
+    this->EmbedComponent(wittyfields);
+    //this->EmbedWittyComponent("embeddedobjects/photoalbum/photoalbum.witty", "photoalbum", wittyfields);
+  }
+>;
