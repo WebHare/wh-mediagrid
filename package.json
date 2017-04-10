@@ -8,7 +8,7 @@
     "dompack-carrousel": "git://github.com/WebHare/dompack-carrousel.git",
     "dompack-justifiedcontentgrid": "git://github.com/WebHare/dompack-justifiedcontentgrid.git"
   },
-  "webhare_widget": {
-    "siteprofile": "wh/mediagrid.siteprl.xml"
+  "webhare": {
+    "scopedsiteprofile": "wh/mediagrid.siteprl.xml"
   }
 }
