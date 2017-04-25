@@ -10,10 +10,13 @@
 }
 .html--onlyfullscreenelement .body__content
 {
+  position: absolute; /* take out of the flow */
   height: 0 !important;
+  padding: 0 !important;
   overflow: hidden !important;
   visibility: hidden;
 }
+
 
 
 
