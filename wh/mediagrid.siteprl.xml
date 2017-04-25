@@ -78,6 +78,7 @@ ADDME: contentlisting which renders the foto's in the album
               renderlibrary="mediagrid.whlib"
               renderobjectname="MediaGridWidget"
               wittycomponent="mediagrid.witty:widget-mediagrid"
+              tolliumicon="tollium:datatypes/image"
               tid="widgettypes.mediagrid">
     <members>
       <member name="sourcefolder" type="whfsref" />
