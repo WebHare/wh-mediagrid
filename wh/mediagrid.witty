@@ -133,7 +133,9 @@
 
 [component carrousel_slides_css]
   <style>
-    /* Small and extra small devices */
+    [! Desktop and tablets
+       1600 x 1600 / 70%
+    !]
     [forevery slides]
       .image-[instanceid]-[seqnr]
       {
@@ -142,7 +144,9 @@
       }
     [/forevery]
 
-    /* Use the large version if we either have a high pixel density */
+    [! Desktop and tablets with a pixel ratio of 2 or higher
+       2048 x 2048 / 60%
+    !]
     @media (-webkit-min-device-pixel-ratio: 2),
            (min--moz-device-pixel-ratio: 2),
            (min-resolution: 2dppx),
@@ -153,6 +157,27 @@
         {
           background-image: url('[image_2x.link]');
           background-position: [if image_2x.refpoint_backgroundposition][image_2x.refpoint_backgroundposition][else]center[/if];
+        }
+      [/forevery]
+    }
+
+    [! Mobile
+       1200 x 1200 / 40%
+
+       - iPhone 7 - virtual/logical: 414 x 736 - 1242 x 2208
+       - iOS tablets - most of them 768 x 1024 or a little higher virtual
+
+       We assume nowadays all mobile devices have a pixel-ratio of 2.
+       However we do not need to offer that full resolution/quality, we need to conserve bandwidth
+       and also need to assume the network isn't fast. (in case of no 4G+ or bad connectivity)
+    !]
+    @media (max-width: 767px)
+    {
+      [forevery slides]
+        .image-[instanceid]-[seqnr]
+        {
+          background-image: url('[image_mobile.link]');
+          background-position: [if image_mobile.refpoint_backgroundposition][image_mobile.refpoint_backgroundposition][else]center[/if];
         }
       [/forevery]
     }
